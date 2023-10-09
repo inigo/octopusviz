@@ -1,0 +1,1 @@
+# We're not setting anything in this file, but having it present prevents SBT complaining that it can't be found on startup
