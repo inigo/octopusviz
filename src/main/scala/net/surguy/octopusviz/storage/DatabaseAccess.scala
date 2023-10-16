@@ -21,9 +21,11 @@ class DatabaseAccess(dataSource: DataSource, executionContext: ExecutionContext)
   private val xa = Transactor.fromDataSource[IO](dataSource, executionContext)
   private val utc = ZoneId.of("UTC")
 
+  implicit val energyTypePut: Put[EnergyType] = Put[String].tcontramap(_.name)
+
   def storeConsumption(energyType: EnergyType, consumption: List[Consumption]): Seq[UUID] = {
     consumption.map { c =>
-      sql"insert into consumption (interval_start, interval_end, consumption, energy_type) values (${c.intervalStart}, ${c.intervalEnd}, ${c.consumption}, ${energyType.name})".
+      sql"insert into consumption (interval_start, interval_end, consumption, energy_type) values (${c.intervalStart}, ${c.intervalEnd}, ${c.consumption}, $energyType)".
         update.withUniqueGeneratedKeys[UUID]("id")
     }.traverse(identity).transact(xa).unsafeRunSync()
   }
@@ -37,7 +39,7 @@ class DatabaseAccess(dataSource: DataSource, executionContext: ExecutionContext)
   }
 
   def findMostRecentIntervalEnd(energyType: EnergyType): Option[ZonedDateTime] = {
-    sql"select interval_end from consumption where energy_type=${energyType.name} order by interval_end desc limit 1".query[LocalDateTime].option.transact(xa).unsafeRunSync().map(_.atZone(utc))
+    sql"select interval_end from consumption where energy_type=$energyType order by interval_end desc limit 1".query[LocalDateTime].option.transact(xa).unsafeRunSync().map(_.atZone(utc))
   }
 
 }
