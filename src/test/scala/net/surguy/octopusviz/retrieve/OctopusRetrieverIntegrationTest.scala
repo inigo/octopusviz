@@ -3,18 +3,25 @@ package net.surguy.octopusviz.retrieve
 import net.surguy.octopusviz.UsesConfig
 import org.specs2.mutable.Specification
 
+import java.time.{ZoneId, ZonedDateTime}
+
 class OctopusRetrieverIntegrationTest extends Specification with UsesConfig {
 
   private val retriever = new OctopusRetriever(electricityId, gasId, apiKey)
   
   "Retrieving energy data" should {
     "return some text" in {
-      retriever.fetchEnergyData("electricity", electricityId) must beSome
+      retriever.fetchInitialEnergyData("electricity", electricityId) must beSome
     }
     "parse the returned JSON" in {
-      retriever.fetchEnergyData("electricity", electricityId).map(retriever.parseResults) must beSome
+      retriever.fetchInitialEnergyData("electricity", electricityId).map(retriever.parseResults) must beSome
     }
-// Hits the Octopus API repeatedly, and is slow, so commented out to be polite
+    "retrieve data since a given date" in {
+      val fromDate = ZonedDateTime.of(2023, 9,3,23,59,51,220, ZoneId.of("UTC"))
+      retriever.fetchInitialEnergyData("electricity", electricityId, periodFrom = Some(fromDate)) must beSome
+    }
+
+    // Hits the Octopus API repeatedly, and is slow, so commented out to be polite
 //    "retrieve all energy data, following the 'next' links" in {
 //      val allResults = retriever.fetchAllElectricityData()
 //      println(allResults.map(_.minBy(_.intervalStart)))

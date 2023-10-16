@@ -14,7 +14,7 @@ import play.api.db.evolutions.OfflineEvolutions
 import play.api.inject.guice.GuiceApplicationBuilder
 
 import java.io.File
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneId}
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import java.util.concurrent.Executors
@@ -24,6 +24,7 @@ import scala.concurrent.{Await, ExecutionContext}
 class DatabaseAccessTest(implicit ee: ExecutionEnv) extends Specification with BeforeSpec with Logging with UsesConfig {
 
   sequential
+  import scala.language.implicitConversions
 
   private val dataSource = HikariDataSource(dbConfig)
   private val ec = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
@@ -47,6 +48,16 @@ class DatabaseAccessTest(implicit ee: ExecutionEnv) extends Specification with B
       } finally {
         db.deleteConsumption(insertedId)
         db.listConsumption().length must beEqualTo(countBefore)
+      }
+    }
+    "return the latest interval date" in {
+      val future = LocalDateTime.now().plusYears(100).truncatedTo(ChronoUnit.MICROS) // Granularity of the datetime in Postgresql is only microseconds, not nanoseconds
+      val consumption = Consumption(10.4, future.minusMinutes(30), future)
+      val insertedId: UUID = db.storeConsumption(Electricity, List(consumption)).head
+      try {
+        db.findMostRecentIntervalEnd(Electricity) must beSome(future.atZone(ZoneId.of("UTC")))
+      } finally {
+        db.deleteConsumption(insertedId)
       }
     }
   }

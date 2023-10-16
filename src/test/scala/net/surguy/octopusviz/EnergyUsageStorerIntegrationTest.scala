@@ -9,9 +9,7 @@ import org.specs2.mutable.Specification
 import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
 
-class EnergyUsageStorerTest extends Specification with UsesConfig {
-
-  skipAll
+class EnergyUsageStorerIntegrationTest extends Specification with UsesConfig {
 
   private val config = ConfigFactory.load("application.conf")
 
@@ -23,7 +21,7 @@ class EnergyUsageStorerTest extends Specification with UsesConfig {
   private val ec = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   private val db = new DatabaseAccess(dataSource, ec)
 
-  "retrieving all data" should {
+  "retrieving the latest data" should {
     "populate the database" in {
       new EnergyUsageStorer(retriever, db).retrieveAndStore()
       ok

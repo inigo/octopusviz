@@ -11,6 +11,7 @@ import doobie.postgres.implicits.*
 import net.surguy.octopusviz.EnergyType
 import net.surguy.octopusviz.retrieve.Consumption
 
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import java.util.UUID
 import javax.sql.DataSource
 import scala.concurrent.ExecutionContext
@@ -18,6 +19,7 @@ import scala.concurrent.ExecutionContext
 class DatabaseAccess(dataSource: DataSource, executionContext: ExecutionContext) {
 
   private val xa = Transactor.fromDataSource[IO](dataSource, executionContext)
+  private val utc = ZoneId.of("UTC")
 
   def storeConsumption(energyType: EnergyType, consumption: List[Consumption]): Seq[UUID] = {
     consumption.map { c =>
@@ -32,6 +34,10 @@ class DatabaseAccess(dataSource: DataSource, executionContext: ExecutionContext)
 
   def deleteConsumption(id: UUID): Int = {
     sql"delete from consumption where id = $id".update.run.transact(xa).unsafeRunSync()
+  }
+
+  def findMostRecentIntervalEnd(energyType: EnergyType): Option[ZonedDateTime] = {
+    sql"select interval_end from consumption where energy_type=${energyType.name} order by interval_end desc limit 1".query[LocalDateTime].option.transact(xa).unsafeRunSync().map(_.atZone(utc))
   }
 
 }
