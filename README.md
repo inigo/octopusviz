@@ -1,4 +1,4 @@
-octopus-energyviz retrieves gas and electricity usage from Octopus Energy.
+octopus-energyviz retrieves gas and electricity usage from Octopus Energy. Ideally, it would help with "energy disaggregation".
 
 ### Usage
 
@@ -22,3 +22,23 @@ then:
     alter user energy with SUPERUSER;
     quit
 ```
+
+## Development
+
+To continually reload any changes, use the SBT Revolver plugin:
+
+```
+bin\sbt 
+
+> ~ reStart 
+```
+
+with BrowserSync:
+
+> npm install -g browser-sync
+
+and then
+
+> browser-sync start --config browsersync-config.js
+
+will launch a browser, with injected BrowserSync JS, to automatically reload when there are changes.

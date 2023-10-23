@@ -35,3 +35,4 @@ metals.sbt
 logs/*
 
 local.conf
+notes.txt
