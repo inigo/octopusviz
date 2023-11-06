@@ -1,5 +1,8 @@
 val scala3Version = "3.3.1"
 val http4sVersion = "0.23.23"
+val circeVersion = "0.14.6"
+val doobieVersion = "1.0.0-RC4"
+val playVersion = "2.9.0"
 
 lazy val compilerOptions = Seq("-Xfatal-warnings", "-unchecked", "-deprecation", "-explain", "-feature")
 lazy val commonSettings = Seq(scalacOptions ++= compilerOptions)
@@ -17,26 +20,26 @@ lazy val root = project
     commonSettings,
 
     libraryDependencies ++= Seq(
-      // Test framework
+      // Test framework (note that the Specs2 cats library is v4, and doesn't seem compatible with specs v5)
       "org.specs2" %% "specs2-core" % "5.3.2" % Test
-      , "org.specs2" %% "specs2-cats" % "4.20.2" % Test
       // Logging
       , "ch.qos.logback" % "logback-classic" % "1.4.11"
       // Config
       , "com.typesafe" % "config" % "1.4.2"
       // JSON parsing
-      , "io.circe" %% "circe-core" % "0.14.6"
-      , "io.circe" %% "circe-parser" % "0.14.6"
-      , "io.circe" %% "circe-generic" % "0.14.6"
+      , "io.circe" %% "circe-core" % circeVersion
+      , "io.circe" %% "circe-parser" % circeVersion
+      , "io.circe" %% "circe-generic" % circeVersion
+      , "io.circe" %% "circe-literal" % circeVersion
       // Database access
-      , "org.tpolecat" %% "doobie-core" % "1.0.0-RC4"
-      , "org.tpolecat" %% "doobie-postgres" % "1.0.0-RC4"
-      , "org.tpolecat" %% "doobie-hikari" % "1.0.0-RC4"
+      , "org.tpolecat" %% "doobie-core" % doobieVersion
+      , "org.tpolecat" %% "doobie-postgres" % doobieVersion
+      , "org.tpolecat" %% "doobie-hikari" % doobieVersion
       , "org.postgresql" % "postgresql" % "42.5.4"
       // Database migrations (using Play instead of Flyway since Flyway doesn't do downs)
-      , "com.typesafe.play" %% "play-jdbc-evolutions" % "2.9.0-RC3"
-      , "com.typesafe.play" %% "play-jdbc" % "2.9.0-RC3"
-      , "com.typesafe.play" %% "play-guice" % "2.9.0-RC3"
+      , "com.typesafe.play" %% "play-jdbc-evolutions" % playVersion
+      , "com.typesafe.play" %% "play-jdbc" % playVersion
+      , "com.typesafe.play" %% "play-guice" % playVersion
       // In-memory test database
       , "com.opentable.components" % "otj-pg-embedded" % "1.0.1" % Test
       // HTTP client
@@ -50,5 +53,6 @@ lazy val root = project
 //      , "org.playframework.twirl" %% "twirl-api" % "2.0.0-M2"
       // Webjars
       , "org.webjars" % "bootstrap" % "5.3.2"
+      , "org.webjars.npm" % "plotly.js-dist-min" % "2.18.2"
     )
 )
