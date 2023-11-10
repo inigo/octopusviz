@@ -42,5 +42,8 @@ jobs:
           DB_URL: jdbc:postgresql://localhost/postgres
           DB_USER: postgres
           DB_PASSWORD: postgres
+          OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+          OCTOPUS_ELECTRICITY_MPAN: ${{ secrets.OCTOPUS_ELECTRICITY_MPAN }}
+          OCTOPUS_ELECTRICITY_SERIALNO: ${{ secrets.OCTOPUS_ELECTRICITY_SERIALNO }}
       - name: Upload dependency graph to support Dependabot
         uses: scalacenter/sbt-dependency-submission@v2
