@@ -63,7 +63,7 @@ class OctopusRetriever(electricity: MeterId, gas: MeterId, apiKey: String) exten
     val response = backend.send(request)
     response.body match {
       case Right(success) =>
-        log.debug("Retrieved:\n" + success)
+        log.trace("Retrieved:\n" + success)
         Some(success)
       case Left(value) =>
         log.warn(s"Failed to retrieve electricity data with: $value")
@@ -72,7 +72,7 @@ class OctopusRetriever(electricity: MeterId, gas: MeterId, apiKey: String) exten
   }
 
   private[retrieve] def parseResults(results: String): Option[ResultsSummary] = {
-    log.debug("Parsing: " + results)
+    log.trace("Parsing: " + results)
     decode[ResultsSummary](results) match {
       case Right(success) => Some(success)
       case Left(failure) =>
