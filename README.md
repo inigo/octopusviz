@@ -23,6 +23,12 @@ then:
     quit
 ```
 
+## API key
+
+Create a file `src/main/resources/local.conf` and copy the "octopus" section of `application.conf` into it, 
+replacing the values with those for your Octopus Energy account at 
+https://octopus.energy/dashboard/new/accounts/personal-details/api-access.
+
 ## Development
 
 To continually reload any changes, use the SBT Revolver plugin:
