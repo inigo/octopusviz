@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      # Creates a Docker container running Postgres, with a database, user and password "postgres"
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'sbt'
+      - name: Run tests
+        run: bin/sbt test
+        env:
+          DB_URL: jdbc:postgresql://localhost/postgres
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+      - name: Upload dependency graph to support Dependabot
+        uses: scalacenter/sbt-dependency-submission@v2
