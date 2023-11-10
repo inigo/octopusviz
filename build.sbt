@@ -16,7 +16,6 @@ lazy val root = project
     name := "octopus-energyviz",
     version := "0.1.0-SNAPSHOT",
     scalaVersion := scala3Version,
-    mainClass := Some("net.surguy.octopusviz.http.Main"),
     commonSettings,
 
     libraryDependencies ++= Seq(
