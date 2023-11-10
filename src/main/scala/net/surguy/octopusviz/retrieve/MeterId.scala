@@ -5,7 +5,6 @@ import io.circe.derivation.{Configuration, ConfiguredCodec}
 
 import java.time.{LocalDateTime, ZoneOffset}
 
-
 case class MeterId(meterPointNumber: String, serialNo: String)
 
 // The JSON uses the snake case interval_start and interval_end, we prefer intervalStart and intervalEnd
