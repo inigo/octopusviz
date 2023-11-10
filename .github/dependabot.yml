@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: "sbt"
-    directory: "/"
+  - package-ecosystem: sbt
+    directory: /
     schedule:
-      interval: "daily"
+      interval: daily
