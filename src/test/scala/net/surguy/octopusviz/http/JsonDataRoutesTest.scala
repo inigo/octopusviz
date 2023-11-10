@@ -43,3 +43,10 @@ class JsonDataRoutesTest extends Specification with Http4sTestHelpers {
 
 
 }
+
+    "return data in the correct format for the Plotly graph" in {
+      val response = jsonDataRoutes.testGet(uri"/data/consumption?energyType=electricity&startDate=2023-02-01").unsafeBodyText()
+      val jsonData = parse(response).getOrElse(Json.Null)
+      jsonData.asArray must beSome
+      jsonData.asArray.get.forall(item => item.asObject.get.keys.toSet == Set("x", "y")) must beTrue
+    }
