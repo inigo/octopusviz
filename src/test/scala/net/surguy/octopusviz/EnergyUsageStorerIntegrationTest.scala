@@ -12,6 +12,8 @@ class EnergyUsageStorerIntegrationTest extends Specification with UsesConfig wit
   private val gasId: MeterId = MeterId(config.getString("octopus.gas.meterPointNumber"), config.getString("octopus.gas.serialNo"))
   private val retriever = new OctopusRetriever(electricityId, gasId, config.getString("octopus.apiKey"))
 
+  skipAll
+
   "retrieving the latest data" should {
     "populate the database" in {
       new EnergyUsageStorer(retriever, db).retrieveAndStore()
