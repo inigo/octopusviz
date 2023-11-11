@@ -20,11 +20,11 @@ lazy val root = project
 
     libraryDependencies ++= Seq(
       // Test framework (note that the Specs2 cats library is v4, and doesn't seem compatible with specs v5)
-      "org.specs2" %% "specs2-core" % "5.3.2" % Test
+      "org.specs2" %% "specs2-core" % "5.4.0" % Test
       // Logging
       , "ch.qos.logback" % "logback-classic" % "1.4.11"
       // Config
-      , "com.typesafe" % "config" % "1.4.2"
+      , "com.typesafe" % "config" % "1.4.3"
       // JSON parsing
       , "io.circe" %% "circe-core" % circeVersion
       , "io.circe" %% "circe-parser" % circeVersion
@@ -34,21 +34,21 @@ lazy val root = project
       , "org.tpolecat" %% "doobie-core" % doobieVersion
       , "org.tpolecat" %% "doobie-postgres" % doobieVersion
       , "org.tpolecat" %% "doobie-hikari" % doobieVersion
-      , "org.postgresql" % "postgresql" % "42.5.4"
+      , "org.postgresql" % "postgresql" % "42.6.0"
       // Database migrations (using Play instead of Flyway since Flyway doesn't do downs)
       , "com.typesafe.play" %% "play-jdbc-evolutions" % playVersion
       , "com.typesafe.play" %% "play-jdbc" % playVersion
       , "com.typesafe.play" %% "play-guice" % playVersion
       // In-memory test database
-      , "com.opentable.components" % "otj-pg-embedded" % "1.0.1" % Test
+      , "com.opentable.components" % "otj-pg-embedded" % "1.0.2" % Test
       // HTTP client
-      , "com.softwaremill.sttp.client3" %% "core" % "3.9.0"
+      , "com.softwaremill.sttp.client3" %% "core" % "3.9.1"
       // HTTP server
       , "org.http4s" %% "http4s-ember-client" % http4sVersion
       , "org.http4s" %% "http4s-ember-server" % http4sVersion
       , "org.http4s" %% "http4s-dsl" % http4sVersion
       , "org.http4s" %% "http4s-circe" % http4sVersion
-      , "com.typesafe.play" %% "twirl-api" % "1.6.1"
+      , "com.typesafe.play" %% "twirl-api" % "1.6.2"
 //      , "org.playframework.twirl" %% "twirl-api" % "2.0.0-M2"
       // Webjars
       , "org.webjars" % "bootstrap" % "5.3.2"
