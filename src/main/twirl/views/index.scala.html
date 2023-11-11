@@ -1,15 +1,15 @@
-@import java.time.LocalDate @import net.surguy.octopusviz.http.DateUtils._
+@import java.time.LocalDate
+@import net.surguy.octopusviz.http.DateUtils._
 @(startDate: LocalDate, endDate: LocalDate)
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en-gb">
   <head>
     <title>Energy consumption</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="data:," />
-    <!-- Prevent favicon requests -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,"> <!-- Prevent favicon requests -->
     <!--suppress HtmlUnknownTarget -->
-    <link rel="stylesheet" href="/bootstrap/5.3.2/css/bootstrap.css" />
+    <link rel="stylesheet" href="/bootstrap/5.3.2/css/bootstrap.css">
     <!--suppress HtmlUnknownTarget -->
     <script src="/plotly.js-dist-min/2.18.2/plotly.min.js"></script>
     <!--suppress HtmlUnknownTarget -->
@@ -23,182 +23,59 @@
     <div id="tester" style="width: 600px; height: 250px"></div>
 
     <script>
+      var trace1Data = [];
+
+      function fetchData() {
+        fetch('/data/consumption')
+          .then(response => response.json())
+          .then(data => {
+            trace1Data = data;
+          })
+          .catch(error => console.error('Error:', error));
+      }
+
+      fetchData();
 
       document.addEventListener("DOMContentLoaded", function() {
 
-          var trace1 = {
-            x: [1, 2, 3, 4],
-            y: [10, 15, 13, 17],
-            type: 'scatter',
-            name: "First one",
-            line: {
-              color: 'rgb(55, 128, 191)',
-              width: 2,
-              shape: "spline"
-            },
-            marker: {
-              color: 'rgb(55, 128, 191)',
-              size: 8
-            },
-          };
+        var trace1 = {
+          x: trace1Data.map(data => data.x),
+          y: trace1Data.map(data => data.y),
+          type: 'scatter',
+          name: "First one",
+          line: {
+            color: 'rgb(55, 128, 191)',
+            width: 2,
+            shape: "spline"
+          },
+          marker: {
+            color: 'rgb(55, 128, 191)',
+            size: 8
+          },
+        };
 
-          var data = [trace1];
+        var data = [trace1];
 
-          var layout = {
-            title:'Power consumption',
-            margin: { t: 0 },
-            xaxis: {
-              title: 'Date',
-              showgrid: true,
-              showline: true,
-              zeroline: true,
-              autorange: true
-            },
-            yaxis: {
-              title: 'Consumption',
-              showline: true,
-              zeroline: true,
-              autorange: true
-            }
-          };
-
-          const TESTER = document.getElementById('tester');
-          Plotly.newPlot( TESTER, data, layout, {displayModeBar: false, staticPlot: true} );
-      });
-
-
-
-          </body>
-      </html>
-          var trace1Data = [];
-
-          function fetchData() {
-            fetch('/data/consumption')
-              .then(response => response.json())
-              .then(data => {
-                trace1Data = data;
-              })
-              .catch(error => console.error('Error:', error));
+        var layout = {
+          title:'Power consumption',
+          margin: { t: 0 },
+          xaxis: {
+            title: 'Date',
+            showgrid: true,
+            showline: true,
+            zeroline: true,
+            autorange: true
+          },
+          yaxis: {
+            title: 'Consumption',
+            showline: true,
+            zeroline: true,
+            autorange: true
           }
+        };
 
-          fetchData();
-
-      document.addEventListener("DOMContentLoaded", function() {
-
-          var trace1 = {
-            x: trace1Data.map(data => data.x),
-            y: trace1Data.map(data => data.y),
-            type: 'scatter',
-            name: "First one",
-            line: {
-              color: 'rgb(55, 128, 191)',
-              width: 2,
-              shape: "spline"
-            },
-            marker: {
-              color: 'rgb(55, 128, 191)',
-              size: 8
-            },
-          };
-
-          var trace2 = {
-            x: [1, 2, 3, 4],
-            y: [16, 5, 11, 9],
-            type: 'scatter',
-            name: "Second one"
-          };
-
-          var data = [trace1, trace2];
-
-          var layout = {
-            title:'Power consumption',
-            margin: { t: 0 },
-            xaxis: {
-              title: 'Date',
-              showgrid: true,
-              showline: true,
-              zeroline: true,
-              range: [0, 8],
-              autorange: false
-            },
-            yaxis: {
-              title: 'Consumption',
-              showline: true,
-              zeroline: true,
-              range: [0, 20],
-              autorange: false
-            }
-          };
-
-          const TESTER = document.getElementById('tester');
-          Plotly.newPlot( TESTER, data, layout, {displayModeBar: false, staticPlot: true} );
-      });
-
-
-          </body>
-      </html>
-          var trace1Data = [];
-
-          function fetchData() {
-            fetch('/data/consumption')
-              .then(response => response.json())
-              .then(data => {
-                trace1Data = data;
-              })
-              .catch(error => console.error('Error:', error));
-          }
-
-          fetchData();
-
-      document.addEventListener("DOMContentLoaded", function() {
-
-          var trace1 = {
-            x: trace1Data.map(data => data.x),
-            y: trace1Data.map(data => data.y),
-            type: 'scatter',
-            name: "First one",
-            line: {
-              color: 'rgb(55, 128, 191)',
-              width: 2,
-              shape: "spline"
-            },
-            marker: {
-              color: 'rgb(55, 128, 191)',
-              size: 8
-            },
-          };
-
-          var trace2 = {
-            x: [1, 2, 3, 4],
-            y: [16, 5, 11, 9],
-            type: 'scatter',
-            name: "Second one"
-          };
-
-          var data = [trace1, trace2];
-
-          var layout = {
-            title:'Power consumption',
-            margin: { t: 0 },
-            xaxis: {
-              title: 'Date',
-              showgrid: true,
-              showline: true,
-              zeroline: true,
-              range: [0, 8],
-              autorange: false
-            },
-            yaxis: {
-              title: 'Consumption',
-              showline: true,
-              zeroline: true,
-              range: [0, 20],
-              autorange: false
-            }
-          };
-
-          const TESTER = document.getElementById('tester');
-          Plotly.newPlot( TESTER, data, layout, {displayModeBar: false, staticPlot: true} );
+        const TESTER = document.getElementById('tester');
+        Plotly.newPlot( TESTER, data, layout, {displayModeBar: false, staticPlot: true} );
       });
     </script>
   </body>
