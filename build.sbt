@@ -21,6 +21,7 @@ lazy val root = project
     libraryDependencies ++= Seq(
       // Test framework (note that the Specs2 cats library is v4, and doesn't seem compatible with specs v5)
       "org.specs2" %% "specs2-core" % "5.4.0" % Test
+      , "org.mockito" % "mockito-core" % "5.7.0" % Test
       // Logging
       , "ch.qos.logback" % "logback-classic" % "1.4.11"
       // Config
