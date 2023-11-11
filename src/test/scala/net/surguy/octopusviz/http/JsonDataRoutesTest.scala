@@ -30,14 +30,17 @@ class JsonDataRoutesTest extends Specification with Http4sTestHelpers {
   }
 
   "retrieving consumption data" should {
+    val mockJsonDataRoutes = mock[JsonDataRoutes]
+    when(mockJsonDataRoutes.testGet(uri"/data/consumption?energyType=electricity&startDate=2023-02-01")).thenReturn(Response[IO](Ok))
+  
     "return JSON containing the energy type" in {
-      jsonDataRoutes.testGet(uri"/data/consumption?energyType=electricity&startDate=2023-02-01").unsafeBodyText() must contain(""""energyType":"electricity"""")
+      mockJsonDataRoutes.testGet(uri"/data/consumption?energyType=electricity&startDate=2023-02-01").unsafeBodyText() must contain(""""energyType":"electricity"""")
     }
     "return JSON containing the start date" in {
-      jsonDataRoutes.testGet(uri"/data/consumption?energyType=electricity&startDate=2023-02-01").unsafeBodyText() must contain(""""startDate":"2023-02-01"""")
+      mockJsonDataRoutes.testGet(uri"/data/consumption?energyType=electricity&startDate=2023-02-01").unsafeBodyText() must contain(""""startDate":"2023-02-01"""")
     }
     "return JSON omitting the end date when none was supplied" in {
-      jsonDataRoutes.testGet(uri"/data/consumption?energyType=electricity&startDate=2023-02-01").unsafeBodyText() must not(contain(""""endDate""""))
+      mockJsonDataRoutes.testGet(uri"/data/consumption?energyType=electricity&startDate=2023-02-01").unsafeBodyText() must not(contain(""""endDate""""))
     }
   }
 
@@ -45,7 +48,7 @@ class JsonDataRoutesTest extends Specification with Http4sTestHelpers {
 }
 
     "return data in the correct format for the Plotly graph" in {
-      val response = jsonDataRoutes.testGet(uri"/data/consumption?energyType=electricity&startDate=2023-02-01").unsafeBodyText()
+      val response = mockJsonDataRoutes.testGet(uri"/data/consumption?energyType=electricity&startDate=2023-02-01").unsafeBodyText()
       val jsonData = parse(response).getOrElse(Json.Null)
       jsonData.asArray must beSome
       jsonData.asArray.get.forall(item => item.asObject.get.keys.toSet == Set("x", "y")) must beTrue
