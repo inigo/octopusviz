@@ -1,6 +1,7 @@
 version: 2
 updates:
-  - package-ecosystem: sbt
+  - package-ecosystem: maven
     directory: /
     schedule:
       interval: daily
+    target-file: "**/pom.xml"
