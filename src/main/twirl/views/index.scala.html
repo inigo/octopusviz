@@ -19,17 +19,21 @@
     <body class="p-4">
         <h1>Energy consumption from @formatDate(startDate) to @formatDate(endDate)</h1>
 
-        <div id="tester" style="width:600px;height:250px;"></div>
+        <div id="energyConsumptionGraph" style="width:600px;height:250px;"></div>
 
         <script>
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", async function() {
 
-    var trace1 = {
-      x: [1, 2, 3, 4],
-      y: [10, 15, 13, 17],
+   const electricityData = await fetch("/data/consumption?energyType=electricity&startDate=@startDate&endDate=@endDate")
+      .then((response) => response.json())
+      .catch((error) => console.error("Error:", error));
+
+    const recentElectricityTrace = {
+      x: electricityData.values.map(d => d.interval_start),
+      y: electricityData.values.map(d => d.consumption),
       type: 'scatter',
-      name: "First one",
+      name: "Electricity usage",
       line: {
         color: 'rgb(55, 128, 191)',
         width: 2,
@@ -41,16 +45,9 @@ document.addEventListener("DOMContentLoaded", function() {
       },
     };
 
-    var trace2 = {
-      x: [1, 2, 3, 4],
-      y: [16, 5, 11, 9],
-      type: 'scatter',
-      name: "Second one"
-    };
+    const data = [recentElectricityTrace];
 
-    var data = [trace1, trace2];
-
-    var layout = {
+    const layout = {
       title:'Power consumption',
       margin: { t: 0 },
       xaxis: {
@@ -58,19 +55,17 @@ document.addEventListener("DOMContentLoaded", function() {
         showgrid: true,
         showline: true,
         zeroline: true,
-        range: [0, 8],
-        autorange: false
+        autorange: true
       },
       yaxis: {
         title: 'Consumption',
         showline: true,
         zeroline: true,
-        range: [0, 20],
-        autorange: false
+        autorange: true
       }
     };
 
-    const TESTER = document.getElementById('tester');
+    const TESTER = document.getElementById('energyConsumptionGraph');
     Plotly.newPlot( TESTER, data, layout, {displayModeBar: false, staticPlot: true} );
 });
 

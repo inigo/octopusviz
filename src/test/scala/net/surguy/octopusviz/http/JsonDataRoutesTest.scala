@@ -1,15 +1,27 @@
 package net.surguy.octopusviz.http
 
+import net.surguy.octopusviz.retrieve.Consumption
+import net.surguy.octopusviz.storage.DatabaseAccess
 import org.http4s.*
 import org.http4s.Status.*
+import org.mockito.Mockito.*
+import org.mockito.ArgumentMatchers.*
 import org.specs2.mutable.Specification
+
+import java.time.LocalDateTime
+import java.time.LocalDate
 
 class JsonDataRoutesTest extends Specification with Http4sTestHelpers {
 
-  import JsonDataRoutes.*
+  private val db: DatabaseAccess = mock(classOf[DatabaseAccess])
+  private val dataRoutes = new JsonDataRoutes(db)
+  import dataRoutes._
+
   import org.http4s.implicits.uri
 
   import scala.language.implicitConversions
+
+  when(db.listConsumption(any(classOf[Option[LocalDateTime]]), any(classOf[Option[LocalDateTime]]))).thenReturn(Seq(Consumption(9.5, LocalDate.now().atStartOfDay(), LocalDate.now().atStartOfDay())))
 
   "validating consumption query parameters" should {
     "accept a valid energy type" in {

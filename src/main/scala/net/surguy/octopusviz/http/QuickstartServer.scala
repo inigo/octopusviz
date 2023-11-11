@@ -5,17 +5,27 @@ import cats.effect.unsafe.IORuntime
 import cats.syntax.all.*
 import com.comcast.ip4s.*
 import net.surguy.octopusviz.*
+import net.surguy.octopusviz.storage.DatabaseAccess
 import org.http4s.*
 import org.http4s.dsl.io.*
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits.*
 import org.http4s.server.Router
 import org.http4s.server.staticcontent.webjarServiceBuilder
+import com.zaxxer.hikari.HikariDataSource
 
-object QuickstartServer {
+import java.util.concurrent.Executors
+import scala.concurrent.ExecutionContext
+
+object QuickstartServer extends UsesConfig {
 
   import ConsumptionRoutes.*
-  import JsonDataRoutes.*
+
+  private val dataSource = HikariDataSource(dbConfig)
+  private val ec = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+  private val db = new DatabaseAccess(dataSource, ec)
+
+  val jsonDataRoutes = new JsonDataRoutes(db)
 
   implicit val runtime: IORuntime = cats.effect.unsafe.IORuntime.global
 
@@ -30,7 +40,7 @@ object QuickstartServer {
   }
 
   def run[F[_] : Async](): IO[ExitCode] = {
-    val httpApp = Router("/" -> (consumptionRoutes <+> jsonDataRoutes <+> webjarRoutes <+> fileRoutes) ).orNotFound
+    val httpApp = Router("/" -> (consumptionRoutes <+> jsonDataRoutes.jsonDataRoutes <+> webjarRoutes <+> fileRoutes) ).orNotFound
     EmberServerBuilder
       .default[IO]
       .withHost(ipv4"0.0.0.0")
