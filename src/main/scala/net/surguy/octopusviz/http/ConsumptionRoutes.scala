@@ -19,7 +19,7 @@ object ConsumptionRoutes {
       Ok(htmlContent, "Content-Type" -> "text/html")
     case GET -> Root / "consumption" =>
       val endDate = LocalDate.now()
-      val startDate = endDate.minusYears(1)
+      val startDate = endDate.minusDays(7)
       val htmlContent: String = views.html.index(startDate, endDate).toString
       Ok(htmlContent, "Content-Type" -> "text/html")
     case GET -> Root =>

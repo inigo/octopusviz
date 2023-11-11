@@ -33,6 +33,17 @@ class DatabaseAccess(dataSource: DataSource, executionContext: ExecutionContext)
   def listConsumption(): Seq[Consumption] = {
     sql"select consumption, interval_start, interval_end from consumption order by interval_start desc".query[Consumption].to[List].transact(xa).unsafeRunSync()
   }
+  def listConsumption(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime]): Seq[Consumption] = {
+    val filters = List(
+      startDate.map(d => fr"interval_start >= $d"),
+      endDate.map(d => fr"interval_end <= $d"),
+    ).flatten
+    val whereClause = filters.reduceOption((a, b) => a ++ fr"AND" ++ b)
+    (fr"select consumption, interval_start, interval_end from consumption"
+      ++ whereClause.fold(Fragment.empty)(fr"WHERE" ++ _)
+      ++ fr"order by interval_start desc")
+      .query[Consumption].to[List].transact(xa).unsafeRunSync()
+  }
 
   def deleteConsumption(id: UUID): Int = {
     sql"delete from consumption where id = $id".update.run.transact(xa).unsafeRunSync()
