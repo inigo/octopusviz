@@ -7,7 +7,7 @@ import org.http4s.dsl.io.*
 import org.http4s.headers.Location
 import org.http4s.implicits.*
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 object ConsumptionRoutes {
 
@@ -21,6 +21,11 @@ object ConsumptionRoutes {
       val endDate = LocalDate.now()
       val startDate = endDate.minusDays(7)
       val htmlContent: String = views.html.index(startDate, endDate).toString
+      Ok(htmlContent, "Content-Type" -> "text/html")
+    case GET -> Root / "telemetry" =>
+      val endDate = LocalDateTime.now()
+      val startDate = endDate.minusHours(8)
+      val htmlContent: String = views.html.telemetry(startDate, endDate).toString
       Ok(htmlContent, "Content-Type" -> "text/html")
     case GET -> Root =>
       TemporaryRedirect(Location(uri"/consumption"))

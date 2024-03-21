@@ -1,6 +1,6 @@
 package net.surguy.octopusviz.http
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
 object DateUtils {
@@ -8,6 +8,10 @@ object DateUtils {
   def formatDate(dateTime: LocalDate): String = {
     val dayOfMonth = dateTime.getDayOfMonth
     val formatter = DateTimeFormatter.ofPattern(s"d'${ordinalSuffix(dayOfMonth)}' MMM yyyy")
+    formatter.format(dateTime)
+  }
+  def formatDateTime(dateTime: LocalDateTime): String = {
+    val formatter = DateTimeFormatter.ofPattern(s"HH:MM:ss")
     formatter.format(dateTime)
   }
 
