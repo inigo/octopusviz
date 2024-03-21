@@ -3,7 +3,6 @@ val http4sVersion = "0.23.23"
 val circeVersion = "0.14.6"
 val doobieVersion = "1.0.0-RC4"
 val playVersion = "2.9.0"
-
 lazy val compilerOptions = Seq("-Xfatal-warnings", "-unchecked", "-deprecation", "-explain", "-feature")
 lazy val commonSettings = Seq(scalacOptions ++= compilerOptions)
 
@@ -54,5 +53,8 @@ lazy val root = project
       // Webjars
       , "org.webjars" % "bootstrap" % "5.3.2"
       , "org.webjars.npm" % "plotly.js-dist-min" % "2.18.2"
+
+      , "org.sangria-graphql" %% "sangria" % "4.1.0"
+      , "org.sangria-graphql" %% "sangria-circe" % "1.3.2"
     )
 )
