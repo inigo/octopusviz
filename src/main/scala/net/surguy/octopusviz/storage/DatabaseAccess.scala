@@ -9,7 +9,7 @@ import doobie.implicits.*
 import doobie.postgres.*
 import doobie.postgres.implicits.*
 import net.surguy.octopusviz.EnergyType
-import net.surguy.octopusviz.retrieve.Consumption
+import net.surguy.octopusviz.retrieve.{Consumption, Telemetry}
 
 import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import java.util.UUID
@@ -30,6 +30,13 @@ class DatabaseAccess(dataSource: DataSource, executionContext: ExecutionContext)
     }.traverse(identity).transact(xa).unsafeRunSync()
   }
 
+  def storeTelemetry(telemetry: List[Telemetry]): Seq[UUID] = {
+    telemetry.map { c =>
+      sql"insert into telemetry (read_at, consumption_delta, demand) values (${c.readAt}, ${c.consumptionDelta}, ${c.demand})".
+        update.withUniqueGeneratedKeys[UUID]("id")
+    }.traverse(identity).transact(xa).unsafeRunSync()
+  }
+
   def listConsumption(): Seq[Consumption] = {
     sql"select consumption, interval_start, interval_end from consumption order by interval_start desc".query[Consumption].to[List].transact(xa).unsafeRunSync()
   }
@@ -45,12 +52,34 @@ class DatabaseAccess(dataSource: DataSource, executionContext: ExecutionContext)
       .query[Consumption].to[List].transact(xa).unsafeRunSync()
   }
 
+  def listTelemetry(): Seq[Telemetry] = {
+    sql"select read_at, consumption_delta, demand from telemetry order by read_at desc".query[Telemetry].to[List].transact(xa).unsafeRunSync()
+  }
+  def listTelemetry(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime]): Seq[Telemetry] = {
+    val filters = List(
+      startDate.map(d => fr"read_at >= $d"),
+      endDate.map(d => fr"read_at < $d"),
+    ).flatten
+    val whereClause = filters.reduceOption((a, b) => a ++ fr"AND" ++ b)
+    (fr"select read_at, consumption_delta, demand from telemetry"
+      ++ whereClause.fold(Fragment.empty)(fr"WHERE" ++ _)
+      ++ fr"order by read_at desc")
+      .query[Telemetry].to[List].transact(xa).unsafeRunSync()
+  }
+
   def deleteConsumption(id: UUID): Int = {
     sql"delete from consumption where id = $id".update.run.transact(xa).unsafeRunSync()
+  }
+  def deleteTelemetry(id: UUID): Int = {
+    sql"delete from telemetry where id = $id".update.run.transact(xa).unsafeRunSync()
   }
 
   def findMostRecentIntervalEnd(energyType: EnergyType): Option[ZonedDateTime] = {
     sql"select interval_end from consumption where energy_type=$energyType order by interval_end desc limit 1".query[LocalDateTime].option.transact(xa).unsafeRunSync().map(_.atZone(utc))
+  }
+
+  def findMostRecentReadAt(): Option[ZonedDateTime] = {
+    sql"select read_at from telemetry order by read_at desc limit 1".query[LocalDateTime].option.transact(xa).unsafeRunSync().map(_.atZone(utc))
   }
 
 }
