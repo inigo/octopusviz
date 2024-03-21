@@ -135,8 +135,8 @@ class GraphQlClient(apiKey: String) {
 }
 
 case class TelemetryRaw(readAt: String, consumptionDelta: String, demand: String) {
-  def toTelemetry: Telemetry = Telemetry(ZonedDateTime.parse(readAt), BigDecimal(consumptionDelta).doubleValue, demand.toDouble)
+  def toTelemetry: Telemetry = Telemetry(ZonedDateTime.parse(readAt).toLocalDateTime, BigDecimal(consumptionDelta).doubleValue, demand.toDouble)
 }
-case class Telemetry(readAt: ZonedDateTime, consumptionDelta: Double, demand: Double)
+case class Telemetry(readAt: LocalDateTime, consumptionDelta: Double, demand: Double)
 
 case class MeterIds(electricityDeviceId: Option[String], gasDeviceId: Option[String])

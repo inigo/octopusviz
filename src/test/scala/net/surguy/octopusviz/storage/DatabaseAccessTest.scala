@@ -1,6 +1,6 @@
 package net.surguy.octopusviz.storage
 
-import net.surguy.octopusviz.retrieve.Consumption
+import net.surguy.octopusviz.retrieve.{Consumption, Telemetry}
 import net.surguy.octopusviz.utils.Logging
 import net.surguy.octopusviz.{Electricity, UsesConfig, UsesDatabase}
 import org.specs2.concurrent.ExecutionEnv
@@ -15,8 +15,8 @@ class DatabaseAccessTest(implicit ee: ExecutionEnv) extends Specification with U
   sequential
   import scala.language.implicitConversions
 
-  "Doing things with the database" should {
-    "store, retrieve and delete data" in {
+  "Doing things with consumption data" should {
+    "store, retrieve and delete consumption" in {
       val future = LocalDateTime.now().plusYears(100).truncatedTo(ChronoUnit.MICROS) // Granularity of the datetime in Postgresql is only microseconds, not nanoseconds
       val consumption = Consumption(10.4, future.minusMinutes(30), future)
       val insertedId: UUID = db.storeConsumption(Electricity, List(consumption)).head
@@ -57,6 +57,19 @@ class DatabaseAccessTest(implicit ee: ExecutionEnv) extends Specification with U
         db.findMostRecentIntervalEnd(Electricity) must beSome(future.atZone(ZoneId.of("UTC")))
       } finally {
         db.deleteConsumption(insertedId)
+      }
+    }
+  }
+
+  "Doing things with telemetry data" should {
+    "store, retrieve and delete telemetry" in {
+      val future = LocalDateTime.now().plusYears(100).truncatedTo(ChronoUnit.MICROS) // Granularity of the datetime in Postgresql is only microseconds, not nanoseconds
+      val telemetry = Telemetry(future, 0, 100)
+      val insertedId: UUID = db.storeTelemetry(List(telemetry)).head
+      try {
+        db.listTelemetry().head must beEqualTo(telemetry)
+      } finally {
+        db.deleteTelemetry(insertedId)
       }
     }
   }

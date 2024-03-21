@@ -1,9 +1,12 @@
 package net.surguy.octopusviz
 
-import net.surguy.octopusviz.retrieve.OctopusRetriever
+import net.surguy.octopusviz.retrieve.{GraphQlClient, OctopusRetriever}
 import net.surguy.octopusviz.storage.DatabaseAccess
 
-class EnergyUsageStorer(retriever: OctopusRetriever, dbAccess: DatabaseAccess) {
+import java.time.LocalDateTime
+import java.time.temporal.{ChronoUnit, TemporalUnit}
+
+class EnergyUsageStorer(retriever: OctopusRetriever, graphQl: GraphQlClient, dbAccess: DatabaseAccess) {
 
   def retrieveAndStore(): Unit = {
     val dateOfLatestElectricity = dbAccess.findMostRecentIntervalEnd(Electricity)
@@ -23,6 +26,20 @@ class EnergyUsageStorer(retriever: OctopusRetriever, dbAccess: DatabaseAccess) {
     gas.map { data =>
       dbAccess.storeConsumption(Gas, data)
     }
+  }
+
+  def retrieveTelemetry(accountNumber: String): Unit = {
+    val dateOfLatestTelemetry = dbAccess.findMostRecentReadAt().map(_.toLocalDateTime)
+    val now = LocalDateTime.now()
+    val today: LocalDateTime = now.truncatedTo(ChronoUnit.DAYS)
+    val startTime = dateOfLatestTelemetry match {
+      case None => today
+      case Some(date) if date.isBefore(today) => today
+      case Some(date) => date
+    }
+    val deviceId = graphQl.getMeterIds(accountNumber).electricityDeviceId.get
+    val telemetry = graphQl.getElectricityConsumption(deviceId, startTime, now)
+    dbAccess.storeTelemetry(telemetry)
   }
 
 }
