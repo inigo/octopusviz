@@ -1,0 +1,76 @@
+@import java.time.LocalDate
+@import java.time.LocalDateTime
+@import net.surguy.octopusviz.http.DateUtils._
+
+@(startDate: LocalDateTime, endDate: LocalDateTime)
+<!DOCTYPE html>
+<html lang="en-gb">
+    <head>
+        <title>Telemetry</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="data:,"> <!-- Prevent favicon requests -->
+        <!--suppress HtmlUnknownTarget -->
+        <link rel="stylesheet" href="/bootstrap/5.3.2/css/bootstrap.css">
+        <!--suppress HtmlUnknownTarget -->
+        <script src="/plotly.js-dist-min/2.18.2/plotly.min.js"></script>
+        <!--suppress HtmlUnknownTarget -->
+        <script src="/assets/test.js"></script>
+    </head>
+    <body class="p-4">
+        <h1>Telemetry from @formatDateTime(startDate) to @formatDateTime(endDate)</h1>
+
+        <div id="energyConsumptionGraph" style="width:600px;height:250px;"></div>
+
+        <script>
+
+document.addEventListener("DOMContentLoaded", async function() {
+
+   const electricityData = await fetch("/data/telemetry?startDate=@startDate&endDate=@endDate")
+      .then((response) => response.json())
+      .catch((error) => console.error("Error:", error));
+
+    const recentElectricityTrace = {
+      x: electricityData.values.map(d => d.readAt),
+      y: electricityData.values.map(d => d.demand),
+      type: 'scatter',
+      name: "Electricity usage",
+      line: {
+        color: 'rgb(55, 128, 191)',
+        width: 2,
+        shape: "spline"
+      },
+      marker: {
+        color: 'rgb(55, 128, 191)',
+        size: 8
+      },
+    };
+
+    const data = [recentElectricityTrace];
+
+    const layout = {
+      title:'Power consumption',
+      margin: { t: 0 },
+      xaxis: {
+        title: 'Date',
+        showgrid: true,
+        showline: true,
+        zeroline: false,
+        autorange: true
+      },
+      yaxis: {
+        title: 'Consumption',
+        showline: true,
+        zeroline: true,
+        autorange: true
+      }
+    };
+
+    const TESTER = document.getElementById('energyConsumptionGraph');
+    Plotly.newPlot( TESTER, data, layout, {displayModeBar: true, staticPlot: true} );
+});
+
+
+        </script>
+    </body>
+</html>
