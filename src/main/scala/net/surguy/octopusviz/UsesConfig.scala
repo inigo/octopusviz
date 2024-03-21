@@ -11,6 +11,7 @@ trait UsesConfig {
   protected val electricityId: MeterId = MeterId(config.getString("octopus.electricity.meterPointNumber"), config.getString("octopus.electricity.serialNo"))
   protected val gasId: MeterId = MeterId(config.getString("octopus.gas.meterPointNumber"), config.getString("octopus.gas.serialNo"))
   protected val apiKey: String = config.getString("octopus.apiKey")
+  protected val accountNumber: String = config.getString("octopus.accountNumber")
   
   protected val iqAirApiKey: String = config.getString("iqAir.apiKey")
   protected val latitude: Double = config.getDouble("position.latitude")
