@@ -4,6 +4,12 @@ octopus-energyviz retrieves gas and electricity usage from Octopus Energy. Ideal
 
 This is a normal sbt project. You can compile code with `sbt compile`, run it with `sbt run`, and `sbt console` will start a Scala 3 REPL.
 
+It will run at http://localhost:8080/ - see the http://localhost:8080/consumption and 
+http://localhost:8080/telemetry/yesterday endpoints particularly, and check the ConsumptionRoutes class
+to find other endpoints. 
+
+The telemetry endpoint is most useful if you have an Octopus Home Mini so you can get 10s resolution data.
+
 ## Postgres configuration
 
 Ensure you have Postgres 13+ installed and running.
@@ -39,7 +45,9 @@ bin\sbt
 > ~ reStart 
 ```
 
-with BrowserSync:
+This will launch a server on port 8080: http://localhost:8080/
+
+Then use BrowserSync:
 
 > npm install -g browser-sync
 
