@@ -3,6 +3,7 @@ package net.surguy.octopusviz.retrieve
 import io.circe.Json
 import io.circe.generic.auto.*
 import io.circe.parser.*
+import net.surguy.octopusviz.utils.Logging
 import sangria.ast.Document
 import sangria.parser.QueryParser
 import sangria.renderer.QueryRenderer
@@ -12,7 +13,7 @@ import sttp.model.MediaType
 import java.io.IOException
 import java.time.{Instant, LocalDateTime, ZoneOffset, ZonedDateTime}
 
-class GraphQlClient(apiKey: String) {
+class GraphQlClient(apiKey: String) extends Logging {
 
   private val baseUrl = "https://api.octopus.energy/v1/graphql/"
   private val backend = HttpClientSyncBackend()
@@ -122,6 +123,7 @@ class GraphQlClient(apiKey: String) {
     """).get
 
     val response = sendRequest(query)
+    log.debug(s"Received response: $response")
     val json = parse(response).getOrElse(Json.Null)
     parseTelemetry(json).map(_.toTelemetry)
   }
