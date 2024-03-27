@@ -1,13 +1,16 @@
 package net.surguy.octopusviz
 
-import net.surguy.octopusviz.retrieve.{GraphQlClient, OctopusRetriever}
+import net.surguy.octopusviz.retrieve.{GraphQlClient, OctopusRetriever, Telemetry}
 import net.surguy.octopusviz.storage.DatabaseAccess
 import net.surguy.octopusviz.utils.Logging
 
-import java.time.LocalDateTime
-import java.time.temporal.{ChronoUnit, TemporalUnit}
+import java.time.temporal.ChronoUnit
+import java.time.{LocalDate, LocalDateTime, LocalTime}
+import scala.collection.mutable.ListBuffer
 
 class EnergyUsageStorer(retriever: OctopusRetriever, graphQl: GraphQlClient, dbAccess: DatabaseAccess) extends Logging {
+
+  import net.surguy.octopusviz.EnergyUsageStorer.*
 
   def retrieveAndStore(): Unit = {
     val dateOfLatestElectricity = dbAccess.findMostRecentIntervalEnd(Electricity)
@@ -44,14 +47,31 @@ class EnergyUsageStorer(retriever: OctopusRetriever, graphQl: GraphQlClient, dbA
     dbAccess.storeTelemetry(telemetry)
   }
 
-  def retrieveTelemetryForYesterday(accountNumber: String): Unit = {
-    val now = LocalDateTime.now()
-    val today: LocalDateTime = now.truncatedTo(ChronoUnit.DAYS)
-    val yesterday: LocalDateTime = now.minusDays(1)
-    log.info(s"Retrieving from $yesterday to $today")
+  def retrieveTelemetryBetweenDays(accountNumber: String, startDay: LocalDate, endDay: LocalDate): Seq[Telemetry] = {
+    daysBetweenInclusive(startDay, endDay).flatMap(d => retrieveTelemetryForDay(accountNumber, d))
+  }
+  
+  def retrieveTelemetryForDay(accountNumber: String, day: LocalDate): Seq[Telemetry] = {
+    val start = LocalDateTime.of(day, LocalTime.MIDNIGHT)
+    val end = start.plusDays(1).minusMinutes(1)
+    log.info(s"Retrieving from $start to $end")
     val deviceId = graphQl.getMeterIds(accountNumber).electricityDeviceId.get
-    val telemetry = graphQl.getElectricityConsumption(deviceId, yesterday, today)
+    val telemetry = graphQl.getElectricityConsumption(deviceId, start, end)
     dbAccess.storeTelemetry(telemetry)
+    telemetry
   }
 
+}
+
+object EnergyUsageStorer {
+  def daysBetweenInclusive(startDay: LocalDate, endDay: LocalDate): List[LocalDate] = {
+    if (endDay.isBefore(startDay)) throw new IllegalArgumentException(s"End day $endDay is before start day $startDay")
+    val days = new ListBuffer[LocalDate]
+    var currentDay = startDay
+    while (!currentDay.isAfter(endDay)) {
+      days += currentDay
+      currentDay = currentDay.plusDays(1)
+    }
+    days.toList
+  }
 }
