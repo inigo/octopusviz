@@ -7,6 +7,7 @@ import org.http4s.dsl.io.*
 import org.http4s.headers.Location
 import org.http4s.implicits.*
 
+import java.time.temporal.ChronoUnit
 import java.time.{LocalDate, LocalDateTime}
 
 object ConsumptionRoutes {
@@ -21,6 +22,11 @@ object ConsumptionRoutes {
       val endDate = LocalDate.now()
       val startDate = endDate.minusDays(7)
       val htmlContent: String = views.html.index(startDate, endDate).toString
+      Ok(htmlContent, "Content-Type" -> "text/html")
+    case GET -> Root / "telemetry" / "yesterday" =>
+      val endDate = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS)
+      val startDate = endDate.minusDays(1)
+      val htmlContent: String = views.html.telemetry(startDate, endDate).toString
       Ok(htmlContent, "Content-Type" -> "text/html")
     case GET -> Root / "telemetry" =>
       val endDate = LocalDateTime.now()
