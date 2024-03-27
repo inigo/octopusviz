@@ -5,10 +5,12 @@ import cats.syntax.all.*
 import net.surguy.octopusviz.*
 import net.surguy.octopusviz.retrieve.{Consumption, Telemetry}
 import net.surguy.octopusviz.storage.DatabaseAccess
-import org.http4s.dsl.io.*
 import org.http4s.*
+import org.http4s.dsl.io.*
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.temporal.ChronoUnit
+import java.time.{Duration, LocalDate, LocalDateTime, LocalTime}
+import scala.collection.MapView
 
 class JsonDataRoutes(dbAccess: DatabaseAccess) {
 
@@ -48,6 +50,30 @@ class JsonDataRoutes(dbAccess: DatabaseAccess) {
         val consumptionQuery = TelemetryQuery(maybeStartDate, maybeEndDate)
         val json: String = TelemetryResponse(consumptionQuery, values).asJson.deepDropNullValues.noSpaces
         Ok(json)
+    case _ @ GET -> Root / "data" / "telemetry" / "historicalmean" :? StartDateTimeQueryParamMatcher(maybeStartDate) :? EndDateTimeQueryParamMatcher(maybeEndDate) =>
+        val startDate = maybeStartDate.getOrElse(throw new IllegalArgumentException("No start date provided"))  
+        val endDate = maybeStartDate.getOrElse(throw new IllegalArgumentException("No start date provided"))  
+        val values: Seq[Telemetry] = previousWeekMean(startDate, endDate)
+        val consumptionQuery = TelemetryQuery(maybeStartDate, maybeEndDate)
+        val json: String = TelemetryResponse(consumptionQuery, values).asJson.deepDropNullValues.noSpaces
+        Ok(json)
+  }
+
+  def previousWeekMean(startDate: LocalDateTime, endDate: LocalDateTime): List[Telemetry] = {
+    val extendedPeriod = Duration.ofDays(28)
+    val historicalStartDate = startDate.minus(extendedPeriod)
+    val values = dbAccess.listTelemetry(Some(historicalStartDate), Some(startDate))
+    // Often values are missing, so cannot assume that we can group just by counting. Grouping by more minutes increases the chance of good data
+    val groupByTime: Map[LocalTime, Seq[Telemetry]] = values.groupBy(f => f.readAt.toLocalTime.truncateToNearestXMinutes(5))
+    val averagedByTime: MapView[LocalTime, Option[Double]] = groupByTime.view.mapValues {
+      case telemetrySeq if telemetrySeq.size > 10 => Some(telemetrySeq.map(_.demand).sum / telemetrySeq.size.toDouble)
+      case _ => None
+    }
+    val initialDate = startDate.toLocalDate
+    averagedByTime.flatMap { 
+      case (time, Some(demandAverage)) => Some(Telemetry(LocalDateTime.of(initialDate, time), 0, demandAverage))
+      case _ => None
+    }.toList.sortBy(_.readAt)
   }
 
   case class ConsumptionResponse(query: ConsumptionQuery, values: Seq[Consumption])
@@ -56,4 +82,12 @@ class JsonDataRoutes(dbAccess: DatabaseAccess) {
   case class TelemetryResponse(query: TelemetryQuery, values: Seq[Telemetry])
   case class TelemetryQuery(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime])
 
+}
+
+implicit class LocalTimeExtensions(val time: LocalTime) extends AnyVal {
+  def truncateToNearestXMinutes(x: Int): LocalTime = {
+    val minute = time.getMinute
+    val nearestX = minute - (minute % x)
+    time.truncatedTo(ChronoUnit.HOURS).plusMinutes(nearestX)
+  }
 }
