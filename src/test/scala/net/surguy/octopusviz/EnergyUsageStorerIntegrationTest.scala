@@ -4,6 +4,8 @@ import com.typesafe.config.ConfigFactory
 import net.surguy.octopusviz.retrieve.{GraphQlClient, MeterId, OctopusRetriever}
 import org.specs2.mutable.Specification
 
+import java.time.LocalDate
+
 class EnergyUsageStorerIntegrationTest extends Specification with UsesConfig with UsesDatabase {
 
   private val config = ConfigFactory.load("application.conf")
@@ -27,9 +29,22 @@ class EnergyUsageStorerIntegrationTest extends Specification with UsesConfig wit
       new EnergyUsageStorer(retriever, graphQlClient, db).retrieveTelemetry(accountNumber)
       ok
     }
-    "retrieve telemetry for yesterday" in {
-      new EnergyUsageStorer(retriever, graphQlClient, db).retrieveTelemetryForYesterday(accountNumber)
+    "retrieve telemetry for specified time period" in {
+      new EnergyUsageStorer(retriever, graphQlClient, db).retrieveTelemetryBetweenDays(accountNumber, LocalDate.of(2024, 3, 26), LocalDate.of(2024, 3, 26))
       ok
+    }
+  }
+
+  "retrieve days between two dates" should {
+    "return the start date through to the end date" in {
+      EnergyUsageStorer.daysBetweenInclusive(LocalDate.of(2020, 1, 20), LocalDate.of(2020, 1, 23)) must
+        beEqualTo(Seq(LocalDate.of(2020, 1, 20), LocalDate.of(2020, 1, 21), LocalDate.of(2020, 1, 22), LocalDate.of(2020, 1, 23)))
+    }
+    "return a single day if start and end are the same" in {
+      EnergyUsageStorer.daysBetweenInclusive(LocalDate.of(2020, 1, 20), LocalDate.of(2020, 1, 20)) must beEqualTo(Seq(LocalDate.of(2020, 1, 20)))
+    }
+    "throw an exception if the end is before the start" in {
+      EnergyUsageStorer.daysBetweenInclusive(LocalDate.of(2020, 1, 20), LocalDate.of(2019, 1, 20)) must throwAn[IllegalArgumentException]
     }
   }
 
