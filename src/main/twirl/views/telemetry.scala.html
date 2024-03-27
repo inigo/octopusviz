@@ -39,16 +39,39 @@ document.addEventListener("DOMContentLoaded", async function() {
       mode: 'lines',
       line: {
         color: 'rgb(55, 128, 191)',
-        width: 2,
+        width: 1,
         shape: "spline"
       },
       marker: {
         color: 'rgb(55, 128, 191)',
-        size: 8
+        size: 2
       },
     };
 
-    const data = [recentElectricityTrace];
+   const averageElectricityData = await fetch("/data/telemetry/historicalmean?startDate=@startDate&endDate=@endDate")
+      .then((response) => response.json())
+      .catch((error) => console.error("Error:", error));
+
+    const averageElectricityTrace = {
+      x: averageElectricityData.values.map(d => d.readAt),
+      y: averageElectricityData.values.map(d => d.demand),
+      type: 'scatter',
+      name: "Mean usage",
+      hovermode: 'x',
+      mode: 'lines',
+      line: {
+        color: 'rgb(200, 128, 191)',
+        width: 1,
+        shape: "spline",
+        smoothing: 0.1
+      },
+      marker: {
+        color: 'rgb(200, 128, 191)',
+        size: 2
+      },
+    };
+
+    const data = [recentElectricityTrace, averageElectricityTrace];
 
     const layout = {
       title:'Power consumption',
