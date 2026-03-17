@@ -23,9 +23,9 @@
       <true/>
 
       <key>StandardOutPath</key>
-      <string>/Users/inigosurguy/Library/Logs/octopusviz/stdout.log</string>
+      <string>/var/log/octopus/stdout.log</string>
 
       <key>StandardErrorPath</key>
-      <string>/Users/inigosurguy/Library/Logs/octopusviz/stderr.log</string>
+      <string>/var/log/octopus/stderr.log</string>
   </dict>
   </plist>
