@@ -65,9 +65,12 @@ lazy val root = project
     , assembly / mainClass := Some("net.surguy.octopusviz.http.Main")
     , assembly / assemblyJarName := "octopusviz.jar"
     , assembly / assemblyMergeStrategy := {
-      case PathList("META-INF", "services", _*) => MergeStrategy.concat
-      case PathList("META-INF", _*)             => MergeStrategy.discard
-      case PathList("reference.conf")           => MergeStrategy.concat
-      case _                                    => MergeStrategy.first
+      case PathList("META-INF", "services", _*)                                          => MergeStrategy.concat
+      case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") => MergeStrategy.singleOrError
+      case PathList("META-INF", "resources", "webjars", "swagger-ui", _*)               => MergeStrategy.singleOrError
+      case PathList("META-INF", "resources", "webjars", _*)                             => MergeStrategy.first
+      case PathList("META-INF", _*)                                                      => MergeStrategy.discard
+      case PathList("reference.conf")                                                    => MergeStrategy.concat
+      case _                                                                             => MergeStrategy.first
     }
 )
