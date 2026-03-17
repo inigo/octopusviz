@@ -32,7 +32,7 @@ class EnergyUsageStorer(retriever: OctopusRetriever, graphQl: GraphQlClient, dbA
     }
   }
 
-  def retrieveTelemetry(accountNumber: String): Unit = {
+  def retrieveTelemetry(accountNumber: String): Seq[Telemetry] = {
     val dateOfLatestTelemetry = dbAccess.findMostRecentReadAt().map(_.toLocalDateTime)
     val now = LocalDateTime.now()
     val today: LocalDateTime = now.truncatedTo(ChronoUnit.DAYS)
@@ -45,6 +45,7 @@ class EnergyUsageStorer(retriever: OctopusRetriever, graphQl: GraphQlClient, dbA
     val deviceId = graphQl.getMeterIds(accountNumber).electricityDeviceId.get
     val telemetry = graphQl.getElectricityConsumption(deviceId, startTime, now)
     dbAccess.storeTelemetry(telemetry)
+    telemetry
   }
 
   def retrieveTelemetryBetweenDays(accountNumber: String, startDay: LocalDate, endDay: LocalDate): Seq[Telemetry] = {

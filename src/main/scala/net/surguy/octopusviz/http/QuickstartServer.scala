@@ -13,6 +13,7 @@ import org.http4s.implicits.*
 import org.http4s.server.Router
 import org.http4s.server.staticcontent.webjarServiceBuilder
 import com.zaxxer.hikari.HikariDataSource
+import net.surguy.octopusviz.retrieve.{GraphQlClient, OctopusRetriever}
 
 import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
@@ -25,7 +26,12 @@ object QuickstartServer extends UsesConfig {
   private val ec = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   private val db = new DatabaseAccess(dataSource, ec)
 
+  private val retriever = new OctopusRetriever(electricityId, gasId, apiKey)
+  private val graphQlClient = new GraphQlClient(apiKey)
+  private val energyUsageStorer = new EnergyUsageStorer(retriever, graphQlClient, db)
+
   val jsonDataRoutes = new JsonDataRoutes(db)
+  val ingestionDataRoutes = new IngestionDataRoutes(db, energyUsageStorer, accountNumber)
 
   implicit val runtime: IORuntime = cats.effect.unsafe.IORuntime.global
 
@@ -40,7 +46,7 @@ object QuickstartServer extends UsesConfig {
   }
 
   def run[F[_] : Async](): IO[ExitCode] = {
-    val httpApp = Router("/" -> (consumptionRoutes <+> jsonDataRoutes.jsonDataRoutes <+> webjarRoutes <+> fileRoutes) ).orNotFound
+    val httpApp = Router("/" -> (consumptionRoutes <+> jsonDataRoutes.jsonDataRoutes <+> ingestionDataRoutes.ingestionDataRoutes <+> webjarRoutes <+> fileRoutes) ).orNotFound
     EmberServerBuilder
       .default[IO]
       .withHost(ipv4"0.0.0.0")
