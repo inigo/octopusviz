@@ -16,6 +16,9 @@
       <key>WorkingDirectory</key>
       <string>/opt/octopus</string>
 
+      <key>UserName</key>
+      <string>inigosurguy</string>
+
       <key>RunAtLoad</key>
       <true/>
 
