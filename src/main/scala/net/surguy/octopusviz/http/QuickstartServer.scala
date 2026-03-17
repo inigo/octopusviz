@@ -56,7 +56,7 @@ object QuickstartServer extends UsesConfig {
     EmberServerBuilder
       .default[IO]
       .withHost(ipv4"0.0.0.0")
-      .withPort(port"8080")
+      .withPort(port"8950")
       .withHttpApp(httpApp)
       .build
       .useForever
