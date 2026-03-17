@@ -56,3 +56,12 @@ and then
 > browser-sync start --config browsersync-config.js
 
 will launch a browser, with injected BrowserSync JS, to automatically reload when there are changes.
+
+## Usage
+
+There are two separate datasets:
+
+* Consumption - electricity and gas usage, retrieved via the Octopus REST API, with thirty-minute granularity for the gas and five-minute granularity for the electricity
+* Telemetry - this is electricity usage data at 10s granularity, retrieved via the GraphQL endpoint. This data is only present if there's a working Octopus Home Mini set up to store the data, and in the API it doesn't go back more than a few weeks.
+
+Both are retrieved by running the EnergyUsageStorerIntegrationTest manually, rather than dynamically. The 
