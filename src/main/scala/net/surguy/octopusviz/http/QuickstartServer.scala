@@ -14,6 +14,8 @@ import org.http4s.server.Router
 import org.http4s.server.staticcontent.webjarServiceBuilder
 import com.zaxxer.hikari.HikariDataSource
 import net.surguy.octopusviz.retrieve.{GraphQlClient, OctopusRetriever}
+import sttp.tapir.server.http4s.Http4sServerInterpreter
+import sttp.tapir.swagger.bundle.SwaggerInterpreter
 
 import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
@@ -45,8 +47,12 @@ object QuickstartServer extends UsesConfig {
       StaticFile.fromResource("/assets/" + path, Some(request)).getOrElseF(NotFound())
   }
 
+  private val swaggerRoutes: HttpRoutes[IO] = Http4sServerInterpreter[IO]().toRoutes(
+    SwaggerInterpreter().fromEndpoints[IO](jsonDataRoutes.allEndpoints ++ ingestionDataRoutes.allEndpoints, "OctopusViz", "1.0")
+  )
+
   def run[F[_] : Async](): IO[ExitCode] = {
-    val httpApp = Router("/" -> (consumptionRoutes <+> jsonDataRoutes.jsonDataRoutes <+> ingestionDataRoutes.ingestionDataRoutes <+> webjarRoutes <+> fileRoutes) ).orNotFound
+    val httpApp = Router("/" -> (consumptionRoutes <+> jsonDataRoutes.jsonDataRoutes <+> ingestionDataRoutes.ingestionDataRoutes <+> swaggerRoutes <+> webjarRoutes <+> fileRoutes)).orNotFound
     EmberServerBuilder
       .default[IO]
       .withHost(ipv4"0.0.0.0")

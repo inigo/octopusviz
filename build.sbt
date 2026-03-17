@@ -3,7 +3,8 @@ val http4sVersion = "0.23.23"
 val circeVersion = "0.14.6"
 val doobieVersion = "1.0.0-RC4"
 val playVersion = "2.9.0"
-lazy val compilerOptions = Seq("-Xfatal-warnings", "-unchecked", "-deprecation", "-explain", "-feature")
+val tapirVersion = "1.13.12"
+lazy val compilerOptions = Seq("-Xfatal-warnings", "-unchecked", "-deprecation", "-explain", "-feature", "-Xmax-inlines", "64")
 lazy val commonSettings = Seq(scalacOptions ++= compilerOptions)
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -56,6 +57,10 @@ lazy val root = project
 
       , "org.sangria-graphql" %% "sangria" % "4.1.0"
       , "org.sangria-graphql" %% "sangria-circe" % "1.3.2"
+      // Tapir (OpenAPI / Swagger)
+      , "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion
+      , "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % tapirVersion
+      , "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion
     )
     , assembly / mainClass := Some("net.surguy.octopusviz.http.Main")
     , assembly / assemblyJarName := "octopusviz.jar"
