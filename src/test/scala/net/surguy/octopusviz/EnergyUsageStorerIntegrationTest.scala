@@ -29,8 +29,12 @@ class EnergyUsageStorerIntegrationTest extends Specification with UsesConfig wit
       new EnergyUsageStorer(retriever, graphQlClient, db).retrieveTelemetry(accountNumber)
       ok
     }
+    "retrieve telemetry for yesterday" in {
+      new EnergyUsageStorer(retriever, graphQlClient, db).retrieveTelemetryForDay(accountNumber, LocalDate.of(2026, 3, 15))
+      ok
+    }
     "retrieve telemetry for specified time period" in {
-      new EnergyUsageStorer(retriever, graphQlClient, db).retrieveTelemetryBetweenDays(accountNumber, LocalDate.of(2024, 3, 26), LocalDate.of(2024, 3, 26))
+      new EnergyUsageStorer(retriever, graphQlClient, db).retrieveTelemetryBetweenDays(accountNumber, LocalDate.of(2026, 2, 16), LocalDate.of(2026, 2, 28))
       ok
     }
   }
