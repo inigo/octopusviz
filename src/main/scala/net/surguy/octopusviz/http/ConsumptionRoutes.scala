@@ -33,6 +33,11 @@ object ConsumptionRoutes {
       val startDate = endDate.minusHours(8)
       val htmlContent: String = views.html.telemetry(startDate, endDate).toString
       Ok(htmlContent, "Content-Type" -> "text/html")
+    case GET -> Root / "telemetry" / startDateText / endDateText =>
+      val startDate = LocalDate.parse(startDateText).atStartOfDay()
+      val endDate = LocalDate.parse(endDateText).atStartOfDay()
+      val htmlContent: String = views.html.telemetry(startDate, endDate).toString
+      Ok(htmlContent, "Content-Type" -> "text/html")
     case GET -> Root =>
       TemporaryRedirect(Location(uri"/consumption"))
   }
