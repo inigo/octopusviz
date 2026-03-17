@@ -57,4 +57,12 @@ lazy val root = project
       , "org.sangria-graphql" %% "sangria" % "4.1.0"
       , "org.sangria-graphql" %% "sangria-circe" % "1.3.2"
     )
+    , assembly / mainClass := Some("net.surguy.octopusviz.http.Main")
+    , assembly / assemblyJarName := "octopusviz.jar"
+    , assembly / assemblyMergeStrategy := {
+      case PathList("META-INF", "services", _*) => MergeStrategy.concat
+      case PathList("META-INF", _*)             => MergeStrategy.discard
+      case PathList("reference.conf")           => MergeStrategy.concat
+      case _                                    => MergeStrategy.first
+    }
 )
