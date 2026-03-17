@@ -111,7 +111,7 @@ class GraphQlClient(apiKey: String) extends Logging {
       query {
         smartMeterTelemetry(
           deviceId: "${deviceId}",
-          grouping: TEN_SECONDS,
+          grouping: ONE_MINUTE,
           start: "${start}",
           end: "${end}"
         ) {
