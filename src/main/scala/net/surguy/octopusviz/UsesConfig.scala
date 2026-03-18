@@ -13,10 +13,6 @@ trait UsesConfig {
   protected val apiKey: String = config.getString("octopus.apiKey")
   protected val accountNumber: String = config.getString("octopus.accountNumber")
   
-  protected val iqAirApiKey: String = config.getString("iqAir.apiKey")
-  protected val latitude: Double = config.getDouble("position.latitude")
-  protected val longitude: Double = config.getDouble("position.longitude")
-
   protected val dbConfig: HikariConfig = {
     val hikari = HikariConfig()
     val c = config.getConfig("db.default")
