@@ -6,7 +6,7 @@ import net.surguy.octopusviz.{Electricity, UsesConfig, UsesDatabase}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 
-import java.time.temporal.ChronoUnit
+import java.time.temporal.{ChronoUnit, TemporalUnit}
 import java.time.{LocalDateTime, ZoneId}
 import java.util.UUID
 
@@ -70,6 +70,18 @@ class DatabaseAccessTest(implicit ee: ExecutionEnv) extends Specification with U
         db.listTelemetry().head must beEqualTo(telemetry)
       } finally {
         db.deleteTelemetry(insertedId)
+      }
+    }
+    "retrieve average telemetry between a period" in {
+      val future = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS)
+      val telemetry = (0 to 19).map(i => Telemetry(future.plusMinutes(i), 0, i * 100)).toList
+      val insertedIds = db.storeTelemetry(telemetry)
+      try {
+        db.averageTelemetry(future, future.plusMinutes(20), 10) must beEqualTo(List(Telemetry(future, 0, 450), Telemetry(future.plusMinutes(10), 0, 1450)))
+        db.averageTelemetry(future, future.plusMinutes(10), 10) must beEqualTo(List(Telemetry(future, 0, 450)))
+        db.averageTelemetry(future, future.plusMinutes(6), 2) must beEqualTo(List(Telemetry(future, 0, 50), Telemetry(future.plusMinutes(2), 0, 250), Telemetry(future.plusMinutes(4), 0, 450)))
+      } finally {
+        insertedIds.foreach(db.deleteTelemetry)
       }
     }
   }

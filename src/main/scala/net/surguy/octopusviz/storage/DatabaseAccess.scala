@@ -11,7 +11,7 @@ import doobie.postgres.implicits.*
 import net.surguy.octopusviz.EnergyType
 import net.surguy.octopusviz.retrieve.{Consumption, Telemetry}
 
-import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
+import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
 import java.util.UUID
 import javax.sql.DataSource
 import scala.concurrent.ExecutionContext
@@ -65,6 +65,36 @@ class DatabaseAccess(dataSource: DataSource, executionContext: ExecutionContext)
       ++ whereClause.fold(Fragment.empty)(fr"WHERE" ++ _)
       ++ fr"order by read_at desc")
       .query[Telemetry].to[List].transact(xa).unsafeRunSync()
+  }
+
+  def averageTelemetry(startDate: LocalDateTime, endDate: LocalDateTime, bucketIntervalMinutes: Int): Seq[Telemetry] = {
+    val sql = sql"""
+       WITH params AS (
+            SELECT
+                $startDate AS period_start,
+                $endDate AS period_end,
+                $bucketIntervalMinutes AS bucket_interval_minutes
+        ),
+             buckets AS (
+                 SELECT generate_series(
+                          p.period_start, 
+                          p.period_end - (p.bucket_interval_minutes * interval '1 minute'), 
+                          p.bucket_interval_minutes * interval '1 minute')
+                     AS bucket_start, p.bucket_interval_minutes
+                 FROM params p
+             )
+        SELECT
+            b.bucket_start as read_at,
+            0 as consumption_delta,
+            COALESCE(ROUND(AVG(t.demand)::numeric, 1), 0) AS demand
+        FROM buckets b
+                 LEFT JOIN telemetry t
+                           ON t.read_at >= b.bucket_start
+                               AND t.read_at <  b.bucket_start + (b.bucket_interval_minutes * interval '1 minute')
+        GROUP BY b.bucket_start
+        ORDER BY b.bucket_start;
+       """
+      sql.query[Telemetry].to[List].transact(xa).unsafeRunSync()
   }
 
   def deleteConsumption(id: UUID): Int = {
