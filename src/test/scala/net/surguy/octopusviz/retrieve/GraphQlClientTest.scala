@@ -104,7 +104,7 @@ class GraphQlClientTest extends Specification with UsesConfig {
       val now = LocalDateTime.now().withSecond(0).withNano(0)
       val result = client.getElectricityConsumption(deviceId, now.minusMinutes(5), now.minusMinutes(4))
       println(result)
-      result must haveLength(6)
+      result must haveLength(1) // This depends on the granularity of the query - 10s would be 6, 1 minute would be 1
     }
   }
 
